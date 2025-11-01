@@ -87,24 +87,118 @@ function playSound(frequency, duration = 200, type = 'sine') {
 
 function renderMenu() {
 	menuSection.innerHTML = menuArray.map((item, index) => `
-		<div class="menu-item" style="animation-delay: ${index * 0.2}s">
-			<span class="emoji">${item.emoji}</span>
+		<div class="menu-item">
+			<div class="emoji">${item.emoji}</div>
 			<div class="menu-item-content">
 				<h2>${item.name}</h2>
-				<p>${item.ingredients.join(', ')}</p>
-				<p class="price">$${item.price}</p>
+				<div class="ingredients">${item.ingredients.join(' • ')}</div>
+				<div class="price-container">
+					<div class="price">$${item.price}</div>
+				</div>
+				<div class="menu-item-actions">
+					<button class="add-btn" data-id="${item.id}">
+						<span class="btn-icon">⚡</span>
+						<span class="btn-text">Add to Cart</span>
+						<span class="btn-icon">⚡</span>
+					</button>
+				</div>
 			</div>
-			<button class="add-btn" data-id="${item.id}">✨ Add ✨</button>
 		</div>
 	`).join('');
 	
-	// Add hover sound effects to menu items
-	document.querySelectorAll('.menu-item').forEach(item => {
+	// Add enhanced hover effects
+	document.querySelectorAll('.menu-item').forEach((item, index) => {
 		item.addEventListener('mouseenter', () => {
-			playSound(400 + Math.random() * 200, 100);
+			playSound(400 + (index * 100), 150);
+			
+			// Add particle burst effect
+			createHoverParticles(item);
+		});
+		
+		// Add click ripple effect to the entire card
+		item.addEventListener('click', (e) => {
+			if (!e.target.closest('.add-btn')) {
+				createCardRipple(item, e);
+			}
 		});
 	});
 }
+
+// Enhanced particle effect for hover
+function createHoverParticles(element) {
+	const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#ffd93d', '#ff8a80'];
+	const rect = element.getBoundingClientRect();
+	
+	for (let i = 0; i < 5; i++) {
+		const particle = document.createElement('div');
+		particle.style.cssText = `
+			position: fixed;
+			width: 4px;
+			height: 4px;
+			background: ${colors[Math.floor(Math.random() * colors.length)]};
+			border-radius: 50%;
+			pointer-events: none;
+			z-index: 1000;
+			left: ${rect.left + rect.width / 2}px;
+			top: ${rect.top + rect.height / 2}px;
+			animation: hoverParticle 1s ease-out forwards;
+		`;
+		
+		particle.style.setProperty('--random-x', (Math.random() - 0.5) * 100 + 'px');
+		particle.style.setProperty('--random-y', -Math.random() * 60 - 20 + 'px');
+		
+		document.body.appendChild(particle);
+		setTimeout(() => particle.remove(), 1000);
+	}
+}
+
+// Card ripple effect
+function createCardRipple(element, event) {
+	const rect = element.getBoundingClientRect();
+	const ripple = document.createElement('div');
+	const x = event.clientX - rect.left;
+	const y = event.clientY - rect.top;
+	
+	ripple.style.cssText = `
+		position: absolute;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.4);
+		transform: scale(0);
+		animation: cardRipple 0.8s linear;
+		pointer-events: none;
+		z-index: 1;
+		width: 20px;
+		height: 20px;
+		left: ${x - 10}px;
+		top: ${y - 10}px;
+	`;
+	
+	element.appendChild(ripple);
+	setTimeout(() => ripple.remove(), 800);
+}
+
+// Add particle and ripple animations
+const enhancedStyles = document.createElement('style');
+enhancedStyles.textContent = `
+	@keyframes hoverParticle {
+		0% {
+			transform: translate(0, 0) scale(1);
+			opacity: 1;
+		}
+		100% {
+			transform: translate(var(--random-x), var(--random-y)) scale(0);
+			opacity: 0;
+		}
+	}
+	
+	@keyframes cardRipple {
+		to {
+			transform: scale(8);
+			opacity: 0;
+		}
+	}
+`;
+document.head.appendChild(enhancedStyles);
 
 function renderOrder() {
 	if (order.length === 0) {
