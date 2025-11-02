@@ -46,6 +46,10 @@ particleStyles.textContent = `
 document.head.appendChild(particleStyles);
 
 document.body.innerHTML = `
+	<button class="theme-toggle" id="theme-toggle">
+		<span id="theme-icon">☀️</span>
+		<span id="theme-text">Light</span>
+	</button>
 	<main class="app-container">
 		<header>
 			<h1>
@@ -453,6 +457,45 @@ document.getElementById('checkout-btn').addEventListener('click', () => {
 	renderOrder();
 });
 
+// Theme Toggle Functionality
+function initializeTheme() {
+    // Check for saved theme preference or default to 'dark' mode
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeToggleButton(savedTheme);
+}
+
+function updateThemeToggleButton(theme) {
+    const themeIcon = document.getElementById('theme-icon');
+    const themeText = document.getElementById('theme-text');
+    
+    if (theme === 'light') {
+        themeIcon.textContent = '🌙';
+        themeText.textContent = 'Dark';
+    } else {
+        themeIcon.textContent = '☀️';
+        themeText.textContent = 'Light';
+    }
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeToggleButton(newTheme);
+    
+    // Play theme toggle sound
+    playSound(newTheme === 'light' ? 880 : 440, 200, 'sine');
+}
+
+// Add theme toggle event listener
+document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+// Initialize theme before other components
+initializeTheme();
+
 // Initialize app
 createParticles();
 renderMenu();
@@ -464,7 +507,7 @@ const titles = [
     { text: 'Cosmic Diner', emojis: ['🚀', '🌟'] },
     { text: 'Space Eats', emojis: ['🌌', '🛸'] },
     { text: 'Stellar Bites', emojis: ['✨', '⭐'] },
-    { text: 'Galaxy Grub', emojis: ['🌠', '�'] }
+    { text: 'Galaxy Grub', emojis: ['🌠', '🌍'] }
 ];
 
 setInterval(() => {
